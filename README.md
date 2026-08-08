@@ -1,4 +1,13 @@
-# Naur
+
+
+# Open Naur
+Different LLM integration: This version leverages a different large language model than the original.
+
+No human-in-the-loop: The design removes the human moderation layer, making the system more streamlined and accessible.
+
+Public accessibility: A public URL is provided to make the project easier to access and test.
+
+Work in progress: Development is ongoing, and features may evolve as the project matures.
 
 ## 1. What's the big idea?
 
