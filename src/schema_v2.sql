@@ -1,0 +1,1 @@
+-- Migration: Add session_id to allow multi-tenant public access
