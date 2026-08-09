@@ -1,4 +1,5 @@
 import os
+import json
 from pydantic import BaseModel, Field
 from typing import List
 from openai import OpenAI
@@ -25,27 +26,38 @@ class ArchitecturalAudit(BaseModel):
     constraints: List[DomainConstraint]
     jargon_caught: List[str] = Field(description="Vague buzzwords that need normalizing in the Project Dictionary")
 
-
-def run_architectural_audit(chat_ledger: str, target_model: str = "meta-llama/llama-3.1-70b-instruct") -> ArchitecturalAudit:
+def run_architectural_audit(chat_ledger: str, target_model: str = "deepseek-v4-flash-free") -> ArchitecturalAudit:
     """
     Ingests raw chat history and returns a strictly typed JSON audit.
-    Swap `target_model` at any time to avoid vendor lock-in.
+    Uses a prompt-injected JSON schema fallback for third-party compatibility.
     """
     
-    system_prompt = """
+    # 1. Dynamically extract the schema from our Pydantic model
+    schema_definition = ArchitecturalAudit.model_json_schema()
+    
+    # 2. Inject the schema directly into the system prompt
+    system_prompt = f"""
     You are Project Naur, an ontological linter and Principal Architect. 
     Analyze the following project chat ledger. 
     Calculate the cross-domain blast radius, catch vague jargon, and identify if any vital engineering roles (Missing Chairs) are absent from the decision-making process.
     Be brutally objective and highly technical in your deep dives.
+    
+    You MUST respond in pure JSON format. Your output must strictly adhere to the following JSON schema:
+    {json.dumps(schema_definition)}
     """
 
-    response = client.beta.chat.completions.parse(
+    # 3. Use the standard `.create()` instead of `.parse()`
+    response = client.chat.completions.create(
         model=target_model,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Here is the raw chat ledger:\n\n{chat_ledger}"}
         ],
-        response_format=ArchitecturalAudit,
+        response_format={"type": "json_object"}, # Standard JSON mode
+        temperature=0.1, # Keep it highly deterministic
     )
 
-    return response.choices[0].message.parsed
+    # 4. Extract the raw JSON string and validate it through Pydantic
+    raw_json_string = response.choices[0].message.content
+    
+    return ArchitecturalAudit.model_validate_json(raw_json_string)

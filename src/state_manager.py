@@ -92,3 +92,13 @@ def get_project_dictionary(session_id: str):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.execute("SELECT term FROM project_dictionary WHERE session_id = ?", (session_id,))
         return [row[0] for row in cursor.fetchall()]
+
+
+def get_chat_messages(session_id: str):
+    """Fetches raw chat rows for the UI to render individual chat bubbles."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute(
+            "SELECT role, message FROM chat_ledger WHERE session_id = ? ORDER BY timestamp ASC",
+            (session_id,)
+        )
+        return cursor.fetchall()
