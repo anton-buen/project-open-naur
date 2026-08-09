@@ -54,3 +54,41 @@ def clear_session_data(session_id: str):
         conn.execute("PRAGMA foreign_keys = ON;")
         conn.execute("DELETE FROM active_sessions WHERE session_id = ?", (session_id,))
         conn.commit()
+
+# ---new---
+
+def save_audit(session_id: str, audit_data):
+    """Saves the structured Pydantic audit into the database."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("DELETE FROM domain_constraints WHERE session_id = ?", (session_id,))
+        conn.execute("DELETE FROM project_dictionary WHERE session_id = ?", (session_id,))
+        
+        conn.execute(
+            "INSERT INTO domain_constraints (session_id, domain, business_impact, deep_dive, risk_level) VALUES (?, ?, ?, ?, ?)",
+            (session_id, "GLOBAL", audit_data.global_rationale, "See domain cards for specific architectural blockers.", audit_data.global_risk_score)
+        )
+        
+        for constraint in audit_data.constraints:
+            conn.execute(
+                "INSERT INTO domain_constraints (session_id, domain, business_impact, deep_dive, risk_level) VALUES (?, ?, ?, ?, ?)",
+                (session_id, constraint.domain, constraint.business_impact, constraint.deep_dive, constraint.risk_level)
+            )
+            
+        for term in audit_data.jargon_caught:
+            conn.execute(
+                "INSERT INTO project_dictionary (session_id, term) VALUES (?, ?)",
+                (session_id, term)
+            )
+        conn.commit()
+
+def get_domain_constraints(session_id: str):
+    """Fetches all constraints for the active session."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT domain, business_impact, deep_dive, risk_level FROM domain_constraints WHERE session_id = ?", (session_id,))
+        return cursor.fetchall()
+
+def get_project_dictionary(session_id: str):
+    """Fetches normalized terms for the active session."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT term FROM project_dictionary WHERE session_id = ?", (session_id,))
+        return [row[0] for row in cursor.fetchall()]
