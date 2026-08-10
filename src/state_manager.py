@@ -96,10 +96,12 @@ def get_project_dictionary(session_id: str):
         return cursor.fetchall()
 
 def get_chat_messages(session_id: str):
-    """Fetches raw chat rows for the UI to render individual chat bubbles."""
+    """Fetches raw chat rows and timestamps for the UI to render individual chat bubbles."""
+    import sqlite3
     with sqlite3.connect(DB_PATH) as conn:
+        # Added timestamp to the SELECT query
         cursor = conn.execute(
-            "SELECT role, message FROM chat_ledger WHERE session_id = ? ORDER BY timestamp ASC",
+            "SELECT role, message, timestamp FROM chat_ledger WHERE session_id = ? ORDER BY timestamp ASC",
             (session_id,)
         )
         return cursor.fetchall()

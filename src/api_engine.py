@@ -2,7 +2,6 @@ import os
 import json
 from pydantic import BaseModel, Field
 from typing import List, Literal
-from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -13,35 +12,25 @@ client = OpenAI(
     api_key=os.getenv("OPENCODE_API_KEY"),
 )
 
-
 class JargonTerm(BaseModel):
     term: str = Field(description="The vague buzzword caught in the ledger")
-    definition: str = Field(description="The strict, highly technical definition of this term for this specific project")
+    definition: str = Field(description="The strict, highly technical definition")
 
 class DomainConstraint(BaseModel):
-    # Enforcing exact acronyms so the UI CSS color variables map perfectly
     domain: Literal["PROD", "FE", "BE", "DS", "UI", "DEVOPS", "DATA"] = Field(description="The discipline acronym")
     business_impact: str = Field(description="The layman translation of the blocker")
     deep_dive: str = Field(description="The hardcore, code-level architectural constraint")
     risk_level: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Risk severity")
 
 class ArchitecturalAudit(BaseModel):
-    global_risk_score: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Overall risk of the proposal")
-    global_rationale: str = Field(description="Executive summary of the cross-domain friction")
-    missing_chairs: List[str] = Field(description="Which disciplines are dangerously absent from this chat?")
+    global_risk_score: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Overall risk")
+    global_rationale: str = Field(description="Executive summary")
+    missing_chairs: List[str] = Field(description="Missing disciplines")
     constraints: List[DomainConstraint]
-    jargon_caught: List[JargonTerm] = Field(description="List of buzzwords and their normalized definitions")
+    jargon_caught: List[JargonTerm] = Field(description="Caught jargon")
 
 def run_architectural_audit(chat_ledger: str, target_model: str = "deepseek-v4-flash-free") -> ArchitecturalAudit:
-    """
-    Ingests raw chat history and returns a strictly typed JSON audit.
-    Uses a prompt-injected JSON schema fallback for third-party compatibility.
-    """
-    
-    # 1. Dynamically extract the schema from our Pydantic model
     schema_definition = ArchitecturalAudit.model_json_schema()
-    
-    # 2. Inject the schema directly into the system prompt
     system_prompt = f"""
     You are Project Naur, an ontological linter and Principal Architect. 
     Analyze the following project chat ledger. 
@@ -52,18 +41,15 @@ def run_architectural_audit(chat_ledger: str, target_model: str = "deepseek-v4-f
     {json.dumps(schema_definition)}
     """
 
-    # 3. Use the standard `.create()` instead of `.parse()`
     response = client.chat.completions.create(
         model=target_model,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Here is the raw chat ledger:\n\n{chat_ledger}"}
         ],
-        response_format={"type": "json_object"}, # Standard JSON mode
-        temperature=0.1, # Keep it highly deterministic
+        response_format={"type": "json_object"},
+        temperature=0.1,
     )
 
-    # 4. Extract the raw JSON string and validate it through Pydantic
     raw_json_string = response.choices[0].message.content
-    
     return ArchitecturalAudit.model_validate_json(raw_json_string)
