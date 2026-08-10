@@ -106,11 +106,12 @@ def generate_srs_markdown(title: str, global_sum: dict, domains: dict, glossary:
     return md
 
 _ROLE_AVATAR_MAP = {
-    "Product Manager":   ("PM", "#2A2A2A", "#E9DDCF"),
-    "Frontend Engineer": ("FE", "#2A2A2A", "#E9DDCF"),
-    "Backend Engineer":  ("BE", "#2A2A2A", "#E9DDCF"),
-    "Data Scientist":    ("DS", "#2A2A2A", "#E9DDCF"),
-    "UI/UX Designer":    ("UI", "#2A2A2A", "#E9DDCF"),
+    "Product Manager":           ("PM", "#5D5D81", "#FFFFFF"),
+    "Frontend Engineer":         ("FE", "#6B4A3A", "#FFFFFF"),
+    "Backend Engineer":          ("BE", "#2F3E3E", "#FFFFFF"),
+    "DevOps / SRE":              ("OP", "#2F3E3E", "#FFFFFF"),
+    "Data Engineer / Scientist": ("DT", "#A3A08E", "#FFFFFF"),
+    "UI/UX Designer":            ("UI", "#9E768F", "#FFFFFF"),
 }
 
 sm.init_db()
@@ -125,8 +126,13 @@ with st.sidebar:
     st.markdown('<p class="subtext">Align your team, skip the friction.</p>', unsafe_allow_html=True)
 
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Role</h3>", unsafe_allow_html=True)
-    role = st.selectbox("Role", options=["Product Manager", "Frontend Engineer", "Backend Engineer", "Data Scientist", "UI/UX Designer"], label_visibility="collapsed", key="active_role")
-    
+    role = st.selectbox(
+            "Role", 
+            options=["Product Manager", "Frontend Engineer", "Backend Engineer", "DevOps / SRE", "Data Engineer / Scientist", "UI/UX Designer"], 
+            label_visibility="collapsed", 
+            key="active_role"
+        )
+
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Context</h3>", unsafe_allow_html=True)
     global_context = st.text_area("Context", key="global_context", placeholder="e.g. Serverless AWS. HIPAA Compliance.", height=120, label_visibility="collapsed")
     

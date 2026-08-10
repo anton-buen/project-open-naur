@@ -17,7 +17,7 @@ class JargonTerm(BaseModel):
     definition: str = Field(description="The strict, highly technical definition")
 
 class DomainConstraint(BaseModel):
-    domain: Literal["PROD", "FE", "BE", "DS", "UI", "DEVOPS", "DATA"] = Field(description="The discipline acronym")
+    domain: Literal["PROD", "FE", "BE", "DEVOPS", "DATA", "UI"] = Field(description="The discipline acronym")
     business_impact: str = Field(description="The layman translation of the blocker")
     deep_dive: str = Field(description="The hardcore, code-level architectural constraint")
     risk_level: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Risk severity")
