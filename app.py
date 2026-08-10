@@ -23,10 +23,58 @@ def apply_adaptive_theme() -> None:
         :root {
             --naur-accent-prod: #5D5D81; --naur-accent-fe: #6B4A3A; --naur-accent-be: #2F3E3E;
             --naur-accent-ds: #A3A08E; --naur-accent-ui: #9E768F; --naur-accent-risk: #C48A4A;
+            --naur-mono: ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
         }
         html, body, .stApp { font-family: 'SuisseIntl', 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
         .brand-title { font-family: 'Charter', 'Palatino Linotype', serif !important; font-size: 2.6rem !important; font-weight: 700 !important; color: var(--naur-accent-risk); margin-bottom: 0 !important;}
         .subtext { opacity: 0.6; font-size: 0.9rem; margin-top: -5px; margin-bottom: 15px; }
+        
+        /* Monospace Sandbox Inputs */
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea {
+            font-family: var(--naur-mono) !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Top Header Styling & Alignment */
+        div[data-testid="stTextInput"] div[data-baseweb="input"] {
+            background-color: rgba(128, 128, 128, 0.08) !important;
+            border: 1px solid rgba(128, 128, 128, 0.2) !important;
+            border-radius: 4px !important;
+        }
+        div[data-testid="stTextInput"] input {
+            padding: 8px 12px !important;
+            font-weight: 450 !important;
+            font-size: 0.95rem !important; /* Compact monospace title */
+        }
+
+        div[data-testid="stDownloadButton"] button {
+            font-family: 'SuisseIntl', sans-serif !important;
+            font-weight: 600 !important;
+            text-transform: none !important; /* Disables ALL-CAPS */
+            font-size: 0.8rem !important;
+            border-radius: 4px !important;
+            height: 38px !important;
+            margin: 0 !important;
+        }
+
+        /* Section Headings & Dividers */
+        .section-heading {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.6;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .header-divider {
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Risk & Domain Badges */
         .header-container { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
         .risk-badge { padding: 0.5rem 1rem; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .risk-high { background-color: #B33A3A; color: #FFFFFF; border-left: 4px solid #FF8A8A; }
@@ -38,6 +86,7 @@ def apply_adaptive_theme() -> None:
         .mini-MEDIUM { background-color: #C48A4A; color: #111111; }
         .mini-LOW { background-color: #4E6B4E; color: #FFFFFF; }
 
+        /* Domain Cards */
         .tech-card { padding: 1.5rem; border-radius: 6px; border: 1px solid rgba(128, 128, 128, 0.2); background-color: rgba(128, 128, 128, 0.05); font-size: 0.9rem; line-height: 1.6; height: 100%; display: flex; flex-direction: column; }
         .card-prod { border-top: 4px solid var(--naur-accent-prod) !important; }
         .card-fe { border-top: 4px solid var(--naur-accent-fe) !important; }
@@ -67,22 +116,31 @@ def apply_adaptive_theme() -> None:
         .glossary-term { font-weight: 700; font-size: 0.9rem; margin-top: 1rem; display: block; color: var(--naur-accent-risk); text-transform: uppercase; letter-spacing: 0.05em;}
         .glossary-definition { opacity: 0.8; margin-top: 0.25rem; margin-bottom: 1rem; display: block; }
         .missing-chair-alert { background-color: rgba(179, 58, 58, 0.15); border-left: 4px solid #B33A3A; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; font-weight: 600; color: #ff9999; }
-
-        /* Invisible Title Input Styles */
-        div[data-testid="stTextInput"] div[data-baseweb="input"] { background-color: transparent !important; border: none !important; box-shadow: none !important; }
-        div[data-testid="stTextInput"] input { font-size: 1.75rem !important; font-weight: 700 !important; padding: 0 !important; color: inherit !important; }
         
         /* Custom Chat Bubble Styles */
-        .chat-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-        .chat-avatar { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; }
-        .chat-content { flex-grow: 1; background-color: rgba(128, 128, 128, 0.05); padding: 1rem 1.25rem; border-radius: 2px 12px 12px 12px; border: 1px solid rgba(128, 128, 128, 0.15); }
-        .chat-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;}
-        .chat-role { font-weight: 700; font-size: 0.8rem; color: var(--naur-accent-risk); text-transform: uppercase; letter-spacing: 0.05em;}
-        .chat-time { opacity: 0.4; font-size: 0.7rem; font-family: monospace;}
-        .chat-text { font-size: 0.95rem; line-height: 1.5; opacity: 0.9; }
+        .chat-row { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+        .chat-avatar { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; }
+        .chat-content { flex-grow: 1; background-color: rgba(128, 128, 128, 0.05); padding: 0.85rem 1.15rem; border-radius: 2px 10px 10px 10px; border: 1px solid rgba(128, 128, 128, 0.15); }
+        .chat-header { display: flex; justify-content: space-between; margin-bottom: 0.35rem; align-items: center;}
+        .chat-role { font-weight: 700; font-size: 0.75rem; color: var(--naur-accent-risk); text-transform: uppercase; letter-spacing: 0.05em;}
+        .chat-time { opacity: 0.4; font-size: 0.7rem; font-family: var(--naur-mono);}
+        .chat-text { font-size: 0.9rem; line-height: 1.5; opacity: 0.9; }
+
+        /* Enhanced Chat Input Box */
+        div[data-testid="stChatInput"] {
+            border-radius: 6px !important;
+            border: 1px solid rgba(128, 128, 128, 0.3) !important;
+            background-color: rgba(128, 128, 128, 0.06) !important;
+        }
+        div[data-testid="stChatInput"] textarea {
+            font-family: var(--naur-mono) !important;
+            font-size: 1.06rem !important; /* Increased font size for active typing */
+            padding: 10px 14px !important;
+            min-height: 48px !important;
+        }
 
         /* Audit Line Separator */
-        .audit-line { display: flex; align-items: center; text-align: center; color: var(--naur-accent-risk); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 2.5rem 0; opacity: 0.7; }
+        .audit-line { display: flex; align-items: center; text-align: center; color: var(--naur-accent-risk); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 2rem 0; opacity: 0.7; }
         .audit-line::before, .audit-line::after { content: ''; flex: 1; border-bottom: 1px dashed var(--naur-accent-risk); opacity: 0.5;}
         .audit-line:not(:empty)::before { margin-right: 1em; }
         .audit-line:not(:empty)::after { margin-left: 1em; }
@@ -90,7 +148,7 @@ def apply_adaptive_theme() -> None:
     """, unsafe_allow_html=True)
 
 def make_avatar_uri(initials: str, bg: str, fg: str) -> str:
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="20" fill="{bg}"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="bold" font-family="sans-serif" fill="{fg}">{initials}</text></svg>'
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="18" fill="{bg}"/><text x="18" y="23" text-anchor="middle" font-size="12" font-weight="bold" font-family="sans-serif" fill="{fg}">{initials}</text></svg>'
     return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
 
 def generate_srs_markdown(title: str, global_sum: dict, domains: dict, glossary: list) -> str:
@@ -121,18 +179,21 @@ if "session_id" not in st.session_state:
     st.session_state.session_id = sm.create_session()
 session_id = st.session_state.session_id
 
+# ---------------------------------------------------------
+# SIDEBAR
+# ---------------------------------------------------------
 with st.sidebar:
     st.markdown("<h1 class='brand-title'>Open Naur</h1>", unsafe_allow_html=True)
     st.markdown('<p class="subtext">Align your team, skip the friction.</p>', unsafe_allow_html=True)
 
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Role</h3>", unsafe_allow_html=True)
     role = st.selectbox(
-            "Role", 
-            options=["Product Manager", "Frontend Engineer", "Backend Engineer", "DevOps / SRE", "Data Engineer / Scientist", "UI/UX Designer"], 
-            label_visibility="collapsed", 
-            key="active_role"
-        )
-
+        "Role", 
+        options=["Product Manager", "Frontend Engineer", "Backend Engineer", "DevOps / SRE", "Data Engineer / Scientist", "UI/UX Designer"], 
+        label_visibility="collapsed", 
+        key="active_role"
+    )
+    
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Context</h3>", unsafe_allow_html=True)
     global_context = st.text_area("Context", key="global_context", placeholder="e.g. Serverless AWS. HIPAA Compliance.", height=120, label_visibility="collapsed")
     
@@ -142,7 +203,7 @@ with st.sidebar:
     st.markdown("<hr style='margin: 1.5rem 0; opacity: 0.2;'>", unsafe_allow_html=True)
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7;'>Actions</h3>", unsafe_allow_html=True)
     
-    if st.button("Run Audit", use_container_width=True, type="primary"):
+    if st.button("Audit", use_container_width=True, type="primary"):
         with st.spinner("Analyzing blast radius..."):
             ledger = sm.get_chat_ledger(session_id)
             if ledger == "No communication logged yet.":
@@ -159,29 +220,40 @@ with st.sidebar:
         st.session_state.clear()
         st.rerun()
 
+# ---------------------------------------------------------
+# DASHBOARD HEADER
+# ---------------------------------------------------------
 raw_constraints = sm.get_domain_constraints(session_id)
 glossary = sm.get_project_dictionary(session_id) 
 constraints_dict = {c[0]: {"biz": c[1], "tech": c[2], "risk": c[3]} for c in raw_constraints}
 global_summary = constraints_dict.pop("GLOBAL", None)
 active_domains = list(constraints_dict.keys())
 
-current_title = st.session_state.get("project_title", "Untitled Architecture")
+current_title = st.session_state.get("project_title", "Untitled Project...")
 srs_export_data = generate_srs_markdown(current_title, global_summary, constraints_dict, glossary)
-
-# HEADER: Precisely aligned Title, Date, and Export Button
 current_date = datetime.now().strftime("%b %d, %Y")
-col1, col2, col3 = st.columns([5, 1.2, 1.2])
+
+# Centered Horizontal Header Bar
+col1, col2, col3 = st.columns([5, 1.2, 1.3], vertical_alignment="center")
 
 with col1:
-    st.text_input("Project Title", value="Untitled Architecture", key="project_title", label_visibility="collapsed")
+    st.text_input("Project Title", value="Untitled Project...", key="project_title", label_visibility="collapsed")
 with col2:
-    st.markdown(f"<div style='text-align: right; padding-top: 10px;'><div style='font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; opacity: 0.5;'>Date</div><div style='font-size: 0.85rem; font-weight: 500; opacity: 0.8;'>{current_date}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style='text-align: right; margin-top: -6px;'>
+            <div style='font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; opacity: 0.5;'>Date</div>
+            <div style='font-size: 0.85rem; font-weight: 600; font-family: var(--naur-mono); opacity: 0.9;'>{current_date}</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
 with col3:
-    st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-    st.download_button(label="Export Doc", data=srs_export_data, file_name=f"{current_title.replace(' ', '_')}_Architecture.md", mime="text/markdown", use_container_width=True)
+    st.download_button(label="Export", data=srs_export_data, file_name=f"{current_title.replace(' ', '_')}_Architecture.md", mime="text/markdown", use_container_width=True)
 
-st.markdown("<div style='border-bottom: 1px solid rgba(128,128,128,0.2); margin-bottom: 1.5rem; margin-top: -10px;'></div>", unsafe_allow_html=True)
+st.markdown("<div class='header-divider'></div>", unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# AUDIT CARDS & GLOSSARY
+# ---------------------------------------------------------
 if st.session_state.get("missing_chairs"):
     st.markdown(f"<div class='missing-chair-alert'>MISSING: {', '.join(st.session_state.missing_chairs)}</div>", unsafe_allow_html=True)
 
@@ -269,12 +341,13 @@ if raw_constraints:
                 terms_html += f"<div class='glossary-term'>{html.escape(term)}</div><div class='glossary-definition'>{clean_def}</div>"
             st.markdown(f"<div class='glossary-section'>{terms_html}</div>", unsafe_allow_html=True)
 
-st.markdown("<hr>", unsafe_allow_html=True)
-st.subheader("Ledger")
+# ---------------------------------------------------------
+# CHAT LEDGER
+# ---------------------------------------------------------
+st.markdown("<div class='section-heading'>LEDGER</div>", unsafe_allow_html=True)
 
 chat_messages = sm.get_chat_messages(session_id)
 for row in chat_messages:
-    # Safely unpack in case the database returns rows without a timestamp
     role_tag = row[0]
     msg = row[1]
     ts = row[2] if len(row) > 2 else ""
@@ -307,7 +380,7 @@ for row in chat_messages:
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
 
 if user_intent := st.chat_input("Join the discussion..."):
     active_role = st.session_state.get("active_role", "Product Manager")
