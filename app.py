@@ -5,8 +5,14 @@ import streamlit as st
 import src.state_manager as sm
 from src.api_engine import run_architectural_audit
 from datetime import datetime
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Open Naur", layout="wide", initial_sidebar_state="expanded")
+
+@st.dialog("Feedback & Feature Requests")
+def show_feedback_modal():
+    st.write("Help us improve Open Naur! Share bugs, suggestions, or feedback below:")
+    components.iframe("https://tally.so/r/eqG1qk", height=420, scrolling=True)
 
 def parse_markdown(text: str) -> str:
     if not text or str(text).strip().lower() == "none": return ""
@@ -215,7 +221,10 @@ with st.sidebar:
                 sm.append_message(session_id, "SYSTEM", "AUDIT_RUN")
                 st.rerun()
 
-    if st.button("Clear", use_container_width=True):
+    if st.button("Feedback", use_container_width=True):
+        show_feedback_modal()
+
+    if st.button("Clear Ledger", use_container_width=True):
         sm.clear_session_data(session_id)
         st.session_state.clear()
         st.rerun()
