@@ -13,19 +13,24 @@ client = OpenAI(
 )
 
 
+class JargonTerm(BaseModel):
+    term: str = Field(description="The vague buzzword caught in the ledger")
+    definition: str = Field(description="The strict, highly technical definition of this term for this specific project")
+
 class DomainConstraint(BaseModel):
-    domain: str = Field(description="The discipline (e.g., 'FRONTEND', 'BACKEND', 'PRODUCT')")
+    # Enforcing exact acronyms so the UI CSS color variables map perfectly
+    domain: Literal["PROD", "FE", "BE", "DS", "UI", "DEVOPS", "DATA"] = Field(description="The discipline acronym")
     business_impact: str = Field(description="The layman translation of the blocker")
     deep_dive: str = Field(description="The hardcore, code-level architectural constraint")
-    risk_level: str = Field(description="LOW, MEDIUM, or HIGH")
+    risk_level: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Risk severity")
 
 class ArchitecturalAudit(BaseModel):
-    global_risk_score: str = Field(description="Overall risk of the proposal: LOW, MEDIUM, or HIGH")
+    global_risk_score: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Overall risk of the proposal")
     global_rationale: str = Field(description="Executive summary of the cross-domain friction")
     missing_chairs: List[str] = Field(description="Which disciplines are dangerously absent from this chat?")
     constraints: List[DomainConstraint]
-    jargon_caught: List[str] = Field(description="Vague buzzwords that need normalizing in the Project Dictionary")
-
+    jargon_caught: List[JargonTerm] = Field(description="List of buzzwords and their normalized definitions")
+    
 def run_architectural_audit(chat_ledger: str, target_model: str = "deepseek-v4-flash-free") -> ArchitecturalAudit:
     """
     Ingests raw chat history and returns a strictly typed JSON audit.

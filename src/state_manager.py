@@ -74,10 +74,11 @@ def save_audit(session_id: str, audit_data):
                 (session_id, constraint.domain, constraint.business_impact, constraint.deep_dive, constraint.risk_level)
             )
             
-        for term in audit_data.jargon_caught:
+        # UPDATED: Now saving both term and definition
+        for item in audit_data.jargon_caught:
             conn.execute(
-                "INSERT INTO project_dictionary (session_id, term) VALUES (?, ?)",
-                (session_id, term)
+                "INSERT INTO project_dictionary (session_id, term, definition) VALUES (?, ?, ?)",
+                (session_id, item.term, item.definition)
             )
         conn.commit()
 
@@ -88,11 +89,11 @@ def get_domain_constraints(session_id: str):
         return cursor.fetchall()
 
 def get_project_dictionary(session_id: str):
-    """Fetches normalized terms for the active session."""
+    """Fetches normalized terms and definitions for the active session."""
     with sqlite3.connect(DB_PATH) as conn:
-        cursor = conn.execute("SELECT term FROM project_dictionary WHERE session_id = ?", (session_id,))
-        return [row[0] for row in cursor.fetchall()]
-
+        # UPDATED: Fetching the definition column as well
+        cursor = conn.execute("SELECT term, definition FROM project_dictionary WHERE session_id = ?", (session_id,))
+        return cursor.fetchall()
 
 def get_chat_messages(session_id: str):
     """Fetches raw chat rows for the UI to render individual chat bubbles."""

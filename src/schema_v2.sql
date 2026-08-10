@@ -27,9 +27,11 @@ CREATE TABLE IF NOT EXISTS domain_constraints (
     FOREIGN KEY(session_id) REFERENCES active_sessions(session_id) ON DELETE CASCADE
 );
 
+-- The normalized jargon and strict definitions caught during the audit
 CREATE TABLE IF NOT EXISTS project_dictionary (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id TEXT NOT NULL,
     term TEXT NOT NULL,
+    definition TEXT NOT NULL,
     FOREIGN KEY(session_id) REFERENCES active_sessions(session_id) ON DELETE CASCADE
 );
