@@ -13,11 +13,11 @@ st.set_page_config(page_title="Open Naur", layout="wide", initial_sidebar_state=
 # ---------------------------------------------------------
 
 def parse_markdown(text: str) -> str:
+    """Converts LLM markdown (bold, italic, code) to clean HTML."""
     if not text or str(text).strip().lower() == "none": return ""
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
     text = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
     text = re.sub(r'`([^`]+)`', r'<code style="background: rgba(128,128,128,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85em;">\1</code>', text)
-    # Basic paragraph splitting for simplicity in this merged view
     lines = text.split('\n')
     return "<br>".join([line for line in lines if line])
 
@@ -61,10 +61,20 @@ def apply_adaptive_theme() -> None:
         .tech-text { display: block; font-size: 0.9rem; padding-top: 0.5rem; flex-grow: 1; }
         .jargon-toggle:checked ~ .tech-text { display: none; }
         .jargon-toggle:checked ~ .biz-text { display: block; }
+
+        /* Deep dive styling */
+        details.deep-dive { margin-top: 1.5rem; border-radius: 4px; border: 1px solid rgba(128, 128, 128, 0.2); overflow: hidden; background: rgba(0,0,0,0.1); }
+        details.deep-dive summary { padding: 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; outline: none; transition: background 0.2s; list-style: none; text-align: center; opacity: 0.8;}
+        details.deep-dive summary::-webkit-details-marker { display: none; }
+        details.deep-dive summary:hover { background: rgba(128, 128, 128, 0.1); opacity: 1; }
+        details.deep-dive .deep-content { padding: 1rem; font-size: 0.85rem; line-height: 1.6; border-top: 1px solid rgba(128, 128, 128, 0.2); opacity: 0.9; }
         
         .chat-human { background-color: rgba(128, 128, 128, 0.1); padding: 1rem 1.25rem; border-radius: 12px 12px 12px 2px; font-size: 0.95rem; display: inline-block; border: 1px solid rgba(128, 128, 128, 0.2); }
         .glossary-section { border: 1px solid rgba(128, 128, 128, 0.2); border-top: 4px solid var(--naur-accent-risk); background-color: rgba(128, 128, 128, 0.05); border-radius: 6px; padding: 1.5rem; font-size: 0.9rem; }
-        .glossary-term { font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; display: inline-block; background: rgba(128,128,128,0.1); padding: 2px 8px; border-radius: 4px; margin-right: 8px;}
+        .glossary-term { font-weight: 700; font-size: 0.9rem; margin-top: 1rem; display: block; color: var(--naur-accent-risk); text-transform: uppercase; letter-spacing: 0.05em;}
+        .glossary-definition { opacity: 0.8; margin-top: 0.25rem; margin-bottom: 1rem; display: block; }
+        
+        .missing-chair-alert { background-color: rgba(179, 58, 58, 0.15); border-left: 4px solid #B33A3A; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; font-weight: 600; color: #ff9999; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -99,6 +109,12 @@ with st.sidebar:
 
     st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Role</h3>", unsafe_allow_html=True)
     role = st.selectbox("Role", options=["Product Manager", "Frontend Engineer", "Backend Engineer", "Data Scientist", "UI/UX Designer"], label_visibility="collapsed", key="active_role")
+    
+    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Context</h3>", unsafe_allow_html=True)
+    global_context = st.text_area("Context", key="global_context", placeholder="e.g. Serverless AWS. HIPAA Compliance.", height=120, label_visibility="collapsed")
+    
+    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Governance</h3>", unsafe_allow_html=True)
+    gov_phase = st.select_slider("Governance", options=["Ideation", "Architecture", "Pre-Flight"], value="Architecture", label_visibility="collapsed")
 
     st.markdown("<hr style='margin: 1.5rem 0; opacity: 0.2;'>", unsafe_allow_html=True)
 
@@ -135,15 +151,15 @@ st.markdown(f"""
 
 # Fetch API data from SQLite
 raw_constraints = sm.get_domain_constraints(session_id)
-glossary = sm.get_project_dictionary(session_id)
+glossary = sm.get_project_dictionary(session_id) # Now returns list of tuples: (term, definition)
 
 constraints_dict = {c[0]: {"biz": c[1], "tech": c[2], "risk": c[3]} for c in raw_constraints}
 global_summary = constraints_dict.pop("GLOBAL", None)
 active_domains = list(constraints_dict.keys())
 
-# Render Missing Chairs Warning
+# Render Missing Chairs Warning (No Emojis)
 if st.session_state.get("missing_chairs"):
-    st.error(f"🚨 **MISSING CHAIR RULE TRIGGERED:** {', '.join(st.session_state.missing_chairs)} absent from decision.")
+    st.markdown(f"<div class='missing-chair-alert'>MISSING CHAIR RULE TRIGGERED: {', '.join(st.session_state.missing_chairs)} absent from decision.</div>", unsafe_allow_html=True)
 
 # Render Risk Header
 if raw_constraints:
@@ -163,8 +179,9 @@ if raw_constraints:
     # Global Summary
     if global_summary:
         with st.expander("RATIONALE", expanded=False):
+            biz_text = parse_markdown(html.escape(global_summary["biz"]))
             tech_text = parse_markdown(html.escape(global_summary["tech"]))
-            biz_text  = parse_markdown(html.escape(global_summary["biz"]))
+            
             st.markdown(f"""
             <div class='tech-card' style='border-top: 4px solid var(--naur-accent-risk);'>
                 <input type='checkbox' id='toggle-global' class='jargon-toggle'>
@@ -186,6 +203,8 @@ if raw_constraints:
                 "BE": {"name": "Backend", "class": "card-be"},
                 "DS": {"name": "Data Science", "class": "card-ds"},
                 "UI": {"name": "UI/UX", "class": "card-ui"},
+                "DEVOPS": {"name": "DevOps", "class": "card-be"},
+                "DATA": {"name": "Data Eng", "class": "card-ds"}
             }
             
             items = list(constraints_dict.items())
@@ -195,8 +214,12 @@ if raw_constraints:
                     if i + j < len(items):
                         domain, data = items[i + j]
                         conf = domain_config.get(domain, {"name": domain, "class": "card-be"})
-                        tech_text = parse_markdown(html.escape(data["tech"]))
+                        
                         biz_text = parse_markdown(html.escape(data["biz"]))
+                        # The tech text is strictly the deep dive code-level data
+                        tech_text = parse_markdown(html.escape(data["tech"]))
+                        
+                        deep_dive_html = f"<details class='deep-dive'><summary>Deep Dive</summary><div class='deep-content'>{tech_text}</div></details>" if tech_text else ""
                         
                         cols[j].markdown(f"""
                         <div class='tech-card {conf['class']}'>
@@ -205,15 +228,19 @@ if raw_constraints:
                                 <div class='card-title'>{conf['name']}</div>
                                 <label for='toggle-{domain}' class='jargon-label'>Translate</label>
                             </div>
-                            <div class='tech-text'><b>Engineering Req:</b><br>{tech_text}</div>
+                            <div class='tech-text'><b>Engineering Req:</b><br>{biz_text}</div>
                             <div class='biz-text'><b>Business Impact:</b><br>{biz_text}</div>
+                            {deep_dive_html}
                         </div>
                         """, unsafe_allow_html=True)
 
-    # Glossary
+    # Glossary with Definitions
     if glossary:
         with st.expander("PROJECT DICTIONARY (Caught Jargon)", expanded=False):
-            terms_html = "".join([f"<div class='glossary-term'>{html.escape(t)}</div>" for t in glossary])
+            terms_html = ""
+            for term, definition in glossary:
+                clean_def = parse_markdown(html.escape(definition))
+                terms_html += f"<div class='glossary-term'>{html.escape(term)}</div><div class='glossary-definition'>{clean_def}</div>"
             st.markdown(f"<div class='glossary-section'>{terms_html}</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
@@ -224,17 +251,30 @@ st.subheader("Communication Ledger")
 
 chat_messages = sm.get_chat_messages(session_id)
 for role_tag, msg in chat_messages:
+    # Scrub the hidden metadata from the UI presentation
+    clean_content = re.sub(r'\n?\[Context: .*?\]', '', msg)
+    clean_content = re.sub(r'\n?\[Governance: .*?\]', '', clean_content)
+    
     initials, bg, fg = _ROLE_AVATAR_MAP.get(role_tag, ("U", "#2A2A2A", "#E9DDCF"))
     avatar_uri = make_avatar_uri(initials, bg, fg)
     with st.chat_message("human", avatar=avatar_uri):
-        st.markdown(f"<div class='chat-human'><b>[{role_tag}]</b><br>{html.escape(msg)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-human'><b>[{role_tag}]</b><br>{html.escape(clean_content.strip())}</div>", unsafe_allow_html=True)
 
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 6. INPUT
+# 6. INPUT (WITH HIDDEN METADATA INJECTION)
 # ---------------------------------------------------------
 if user_intent := st.chat_input("Join the discussion..."):
     active_role = st.session_state.get("active_role", "Product Manager")
-    sm.append_message(session_id, active_role, user_intent)
+    ctx_value = st.session_state.get("global_context", "").strip()
+    
+    # Inject hidden brackets into the raw string saved to the database
+    stamped_intent = user_intent
+    if ctx_value:
+        stamped_intent += f"\n[Context: {ctx_value} | Governance: {gov_phase}]"
+    else:
+        stamped_intent += f"\n[Governance: {gov_phase}]"
+        
+    sm.append_message(session_id, active_role, stamped_intent)
     st.rerun()

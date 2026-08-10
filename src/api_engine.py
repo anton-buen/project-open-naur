@@ -1,6 +1,7 @@
 import os
 import json
 from pydantic import BaseModel, Field
+from typing import List, Literal
 from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -30,7 +31,7 @@ class ArchitecturalAudit(BaseModel):
     missing_chairs: List[str] = Field(description="Which disciplines are dangerously absent from this chat?")
     constraints: List[DomainConstraint]
     jargon_caught: List[JargonTerm] = Field(description="List of buzzwords and their normalized definitions")
-    
+
 def run_architectural_audit(chat_ledger: str, target_model: str = "deepseek-v4-flash-free") -> ArchitecturalAudit:
     """
     Ingests raw chat history and returns a strictly typed JSON audit.
