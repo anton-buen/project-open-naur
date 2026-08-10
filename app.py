@@ -240,9 +240,9 @@ with col1:
     st.text_input("Project Title", value="Untitled Project...", key="project_title", label_visibility="collapsed")
 with col2:
     st.markdown(f"""
-        <div style='text-align: right; margin-top: -6px;'>
+        <div style='text-align: right; margin-top: -15px;'>
             <div style='font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; opacity: 0.5;'>Date</div>
-            <div style='font-size: 0.85rem; font-weight: 600; font-family: var(--naur-mono); opacity: 0.9;'>{current_date}</div>
+            <div style='font-size: 0.85rem; font-weight: 450; font-family: var(--naur-mono); opacity: 0.9;'>{current_date}</div>
         </div>
     """, unsafe_allow_html=True)
     
