@@ -28,21 +28,21 @@ def process_pull_request(pr_data: dict):
     except Exception as e:
         print(f"Audit failed: {e}")
         return
-    
+
     # 2. Format the Naur Markdown response for GitHub
-    comment_body = f"## 🛑 Open Naur Architectural Audit\n\n"
+    comment_body = f"## Open Naur Architectural Audit\n\n"
     comment_body += f"**Global Alignment Risk:** `{audit.global_risk_score}`\n\n"
     comment_body += f"> {audit.global_rationale}\n\n"
     
     if audit.missing_chairs:
-        comment_body += f"**🚨 MISSING CHAIRS DETECTED:** {', '.join(audit.missing_chairs)} absent from this PR context.\n\n"
+        comment_body += f"**MISSING:** {', '.join(audit.missing_chairs)}\n\n"
         
-    comment_body += "### 🧱 Domain Constraints\n\n"
+    comment_body += "### Domains\n\n"
     for constraint in audit.constraints:
         comment_body += f"- **{constraint.domain} (`{constraint.risk_level}`)**: {constraint.business_impact}\n"
         
     if audit.jargon_caught:
-        comment_body += "\n### 📖 Project Dictionary (Jargon Caught)\n\n"
+        comment_body += "\n### Glossary\n\n"
         for term in audit.jargon_caught:
             comment_body += f"- **{term.term}**: {term.definition}\n"
             
