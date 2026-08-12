@@ -1,29 +1,80 @@
-import re
-import html
+"""
+Streamlit dashboard and real-time UI for Open Naur architectural alignment platform.
+
+Provides an interactive interface for role-based architectural communication,
+real-time audit execution, domain constraint visualization, and glossary management.
+Implements pure CSS theme engine and accessibility-focused UI components.
+"""
+
 import base64
-import streamlit as st
-import src.state_manager as sm
-from src.api_engine import run_architectural_audit
+import html
+import re
 from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+
+import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Open Naur", layout="wide", initial_sidebar_state="expanded")
+import src.state_manager as sm
+from src.api_engine import run_architectural_audit
+
+st.set_page_config(
+    page_title="Open Naur", layout="wide", initial_sidebar_state="expanded"
+)
+
 
 @st.dialog("Feedback & Feature Requests")
-def show_feedback_modal():
-    st.write("Help us improve Open Naur! Share bugs, suggestions, or feedback below:")
+def show_feedback_modal() -> None:
+    """
+    Display embedded Tally feedback form in a dialog modal.
+
+    Provides users with a lightweight interface to submit feature requests,
+    bug reports, and product feedback without leaving the application.
+    """
+    st.write(
+        "Help us improve Open Naur! Share bugs, suggestions, or feedback below:"
+    )
     components.iframe("https://tally.so/r/eqG1qk", height=420, scrolling=True)
 
+
 def parse_markdown(text: str) -> str:
-    if not text or str(text).strip().lower() == "none": return ""
-    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
-    text = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
-    text = re.sub(r'`([^`]+)`', r'<code style="background: rgba(128,128,128,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85em;">\1</code>', text)
-    lines = text.split('\n')
+    """
+    Convert lightweight Markdown-like syntax to inline HTML.
+
+    Transforms **bold**, *italic*, and `code` patterns into HTML equivalents
+    with embedded styling. Returns empty string for None or "none" values.
+
+    Args:
+        text (str): Input text with Markdown patterns.
+
+    Returns:
+        str: HTML-formatted string with embedded styles.
+    """
+    if not text or str(text).strip().lower() == "none":
+        return ""
+    text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+    text = re.sub(
+        r"(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)", r"<i>\1</i>", text
+    )
+    text = re.sub(
+        r"`([^`]+)`",
+        r'<code style="background: rgba(128,128,128,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85em;">\1</code>',
+        text,
+    )
+    lines = text.split("\n")
     return "<br>".join([line for line in lines if line])
 
+
 def apply_adaptive_theme() -> None:
-    st.markdown("""
+    """
+    Inject custom CSS theme engine into Streamlit application.
+
+    Applies architectural color palette, typography definitions, and
+    interactive component styling via scoped CSS in unsafe HTML mode.
+    Defines CSS custom properties for semantic domain coloring.
+    """
+    st.markdown(
+        """
     <style>
         @font-face { font-family: 'SuisseIntl'; src: url('SuisseIntl-Book.woff2') format('woff2'); font-weight: normal; font-style: normal; }
         :root {
@@ -151,31 +202,72 @@ def apply_adaptive_theme() -> None:
         .audit-line:not(:empty)::before { margin-right: 1em; }
         .audit-line:not(:empty)::after { margin-left: 1em; }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 def make_avatar_uri(initials: str, bg: str, fg: str) -> str:
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="18" fill="{bg}"/><text x="18" y="23" text-anchor="middle" font-size="12" font-weight="bold" font-family="sans-serif" fill="{fg}">{initials}</text></svg>'
+    """
+    Generate a data URI SVG avatar from initials and colors.
+
+    Args:
+        initials (str): 1-2 character initials for the avatar.
+        bg (str): Hex color code for background.
+        fg (str): Hex color code for foreground text.
+
+    Returns:
+        str: Base64-encoded data URI for inline SVG image.
+    """
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">'
+        f'<circle cx="18" cy="18" r="18" fill="{bg}"/>'
+        f'<text x="18" y="23" text-anchor="middle" font-size="12" '
+        f'font-weight="bold" font-family="sans-serif" fill="{fg}">{initials}</text></svg>'
+    )
     return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
 
-def generate_srs_markdown(title: str, global_sum: dict, domains: dict, glossary: list) -> str:
+
+def generate_srs_markdown(
+    title: str,
+    global_sum: Optional[Dict[str, str]],
+    domains: Dict[str, Dict[str, str]],
+    glossary: List[Tuple[str, str]],
+) -> str:
+    """
+    Generate exportable Markdown SRS document from audit results.
+
+    Args:
+        title (str): Project title.
+        global_sum (Optional[Dict]): Global summary with keys risk, biz, tech.
+        domains (Dict): Domain constraints keyed by domain code.
+        glossary (List[Tuple]): List of (term, definition) tuples.
+
+    Returns:
+        str: Formatted Markdown document ready for export.
+    """
     md = f"# {title}\n\n"
     if global_sum:
         md += f"## 1. Global Architecture Summary\n**Risk Level:** {global_sum['risk']}\n\n**Velocity Impact:**\n{global_sum['biz']}\n\n**Architectural Blocker:**\n{global_sum['tech']}\n\n"
     md += "## 2. Domain Constraints\n\n"
     for dom, data in domains.items():
-        md += f"### {dom} (Risk: {data['risk']})\n- **Business Impact:** {data['biz']}\n- **Engineering Deep Dive:** {data['tech']}\n\n"
+        md += (
+            f"### {dom} (Risk: {data['risk']})\n"
+            f"- **Business Impact:** {data['biz']}\n"
+            f"- **Engineering Deep Dive:** {data['tech']}\n\n"
+        )
     md += "## 3. Project Glossary\n\n"
     for term, dfn in glossary:
         md += f"- **{term}**: {dfn}\n"
     return md
 
-_ROLE_AVATAR_MAP = {
-    "Product Manager":           ("PM", "#5D5D81", "#FFFFFF"),
-    "Frontend Engineer":         ("FE", "#6B4A3A", "#FFFFFF"),
-    "Backend Engineer":          ("BE", "#2F3E3E", "#FFFFFF"),
-    "DevOps / SRE":              ("OP", "#2F3E3E", "#FFFFFF"),
+_ROLE_AVATAR_MAP: Dict[str, Tuple[str, str, str]] = {
+    "Product Manager": ("PM", "#5D5D81", "#FFFFFF"),
+    "Frontend Engineer": ("FE", "#6B4A3A", "#FFFFFF"),
+    "Backend Engineer": ("BE", "#2F3E3E", "#FFFFFF"),
+    "DevOps / SRE": ("OP", "#2F3E3E", "#FFFFFF"),
     "Data Engineer / Scientist": ("DT", "#A3A08E", "#FFFFFF"),
-    "UI/UX Designer":            ("UI", "#9E768F", "#FFFFFF"),
+    "UI/UX Designer": ("UI", "#9E768F", "#FFFFFF"),
 }
 
 sm.init_db()
@@ -186,29 +278,64 @@ if "session_id" not in st.session_state:
 session_id = st.session_state.session_id
 
 # ---------------------------------------------------------
-# SIDEBAR
+# SIDEBAR NAVIGATION & CONTROLS
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("<h1 class='brand-title'>Open Naur</h1>", unsafe_allow_html=True)
-    st.markdown('<p class="subtext">Align your team, skip the friction.</p>', unsafe_allow_html=True)
-
-    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Role</h3>", unsafe_allow_html=True)
-    role = st.selectbox(
-        "Role", 
-        options=["Product Manager", "Frontend Engineer", "Backend Engineer", "DevOps / SRE", "Data Engineer / Scientist", "UI/UX Designer"], 
-        label_visibility="collapsed", 
-        key="active_role"
+    st.markdown(
+        '<p class="subtext">Align your team, skip the friction.</p>',
+        unsafe_allow_html=True,
     )
-    
-    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Context</h3>", unsafe_allow_html=True)
-    global_context = st.text_area("Context", key="global_context", placeholder="e.g. Serverless AWS. HIPAA Compliance.", height=120, label_visibility="collapsed")
-    
-    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Governance</h3>", unsafe_allow_html=True)
-    gov_phase = st.select_slider("Governance", options=["Ideation", "Architecture", "Pre-Flight"], value="Architecture", label_visibility="collapsed")
 
-    st.markdown("<hr style='margin: 1.5rem 0; opacity: 0.2;'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7;'>Actions</h3>", unsafe_allow_html=True)
-    
+    st.markdown(
+        "<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Role</h3>",
+        unsafe_allow_html=True,
+    )
+    role = st.selectbox(
+        "Role",
+        options=[
+            "Product Manager",
+            "Frontend Engineer",
+            "Backend Engineer",
+            "DevOps / SRE",
+            "Data Engineer / Scientist",
+            "UI/UX Designer",
+        ],
+        label_visibility="collapsed",
+        key="active_role",
+    )
+
+    st.markdown(
+        "<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Context</h3>",
+        unsafe_allow_html=True,
+    )
+    global_context = st.text_area(
+        "Context",
+        key="global_context",
+        placeholder="e.g. Serverless AWS. HIPAA Compliance.",
+        height=120,
+        label_visibility="collapsed",
+    )
+
+    st.markdown(
+        "<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 1rem;'>Governance</h3>",
+        unsafe_allow_html=True,
+    )
+    gov_phase = st.select_slider(
+        "Governance",
+        options=["Ideation", "Architecture", "Pre-Flight"],
+        value="Architecture",
+        label_visibility="collapsed",
+    )
+
+    st.markdown(
+        "<hr style='margin: 1.5rem 0; opacity: 0.2;'>", unsafe_allow_html=True
+    )
+    st.markdown(
+        "<h3 style='font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7;'>Actions</h3>",
+        unsafe_allow_html=True,
+    )
+
     if st.button("Audit", use_container_width=True, type="primary"):
         with st.spinner("Analyzing blast radius..."):
             ledger = sm.get_chat_ledger(session_id)
@@ -230,52 +357,81 @@ with st.sidebar:
         st.rerun()
 
 # ---------------------------------------------------------
-# DASHBOARD HEADER
+# DASHBOARD HEADER & METADATA
 # ---------------------------------------------------------
 raw_constraints = sm.get_domain_constraints(session_id)
-glossary = sm.get_project_dictionary(session_id) 
+glossary = sm.get_project_dictionary(session_id)
 constraints_dict = {c[0]: {"biz": c[1], "tech": c[2], "risk": c[3]} for c in raw_constraints}
 global_summary = constraints_dict.pop("GLOBAL", None)
 active_domains = list(constraints_dict.keys())
 
 current_title = st.session_state.get("project_title", "Untitled Project...")
-srs_export_data = generate_srs_markdown(current_title, global_summary, constraints_dict, glossary)
+srs_export_data = generate_srs_markdown(
+    current_title, global_summary, constraints_dict, glossary
+)
 current_date = datetime.now().strftime("%b %d, %Y")
 
 # Centered Horizontal Header Bar
 col1, col2, col3 = st.columns([5, 1.2, 1.3], vertical_alignment="center")
 
 with col1:
-    st.text_input("Project Title", value="Untitled Project...", key="project_title", label_visibility="collapsed")
+    st.text_input(
+        "Project Title",
+        value="Untitled Project...",
+        key="project_title",
+        label_visibility="collapsed",
+    )
 with col2:
-    st.markdown(f"""
+    st.markdown(
+        f"""
         <div style='text-align: right; margin-top: -15px;'>
             <div style='font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; opacity: 0.5;'>Date</div>
             <div style='font-size: 0.85rem; font-weight: 450; font-family: var(--naur-mono); opacity: 0.9;'>{current_date}</div>
         </div>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
 with col3:
-    st.download_button(label="Export", data=srs_export_data, file_name=f"{current_title.replace(' ', '_')}_Architecture.md", mime="text/markdown", use_container_width=True)
+    st.download_button(
+        label="Export",
+        data=srs_export_data,
+        file_name=f"{current_title.replace(' ', '_')}_Architecture.md",
+        mime="text/markdown",
+        use_container_width=True,
+    )
 
 st.markdown("<div class='header-divider'></div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# AUDIT CARDS & GLOSSARY
+# AUDIT CARDS & GLOSSARY RENDERING
 # ---------------------------------------------------------
 if st.session_state.get("missing_chairs"):
-    st.markdown(f"<div class='missing-chair-alert'>MISSING: {', '.join(st.session_state.missing_chairs)}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='missing-chair-alert'>MISSING: {', '.join(st.session_state.missing_chairs)}</div>",
+        unsafe_allow_html=True,
+    )
 
 if raw_constraints:
     highest_risk = global_summary["risk"] if global_summary else "LOW"
-    risk_class = {"HIGH": "risk-high", "MEDIUM": "risk-medium", "LOW": "risk-low"}.get(highest_risk, "risk-low")
+    risk_class = {
+        "HIGH": "risk-high",
+        "MEDIUM": "risk-medium",
+        "LOW": "risk-low",
+    }.get(highest_risk, "risk-low")
 
     header_html = f"<div class='header-container'><div class='risk-badge {risk_class}'>Risk: {highest_risk}</div>"
     if active_domains:
-        header_html += "<div style='display: flex; gap: 6px; align-items: center; border-left: 1px solid rgba(128,128,128,0.2); padding-left: 12px; margin-left: 4px;'>"
+        header_html += (
+            "<div style='display: flex; gap: 6px; align-items: center; border-left: "
+            "1px solid rgba(128,128,128,0.2); padding-left: 12px; margin-left: 4px;'>"
+        )
         for dom in active_domains:
             dom_risk = constraints_dict[dom]["risk"]
-            header_html += f"<div class='mini-blast mini-{dom_risk}' title='{dom} Risk: {dom_risk}'>{dom}</div>"
+            header_html += (
+                f"<div class='mini-blast mini-{dom_risk}' title='{dom} Risk: {dom_risk}'>"
+                f"{dom}</div>"
+            )
         header_html += "</div>"
     header_html += "</div>"
     st.markdown(header_html, unsafe_allow_html=True)
@@ -284,8 +440,9 @@ if raw_constraints:
         with st.expander("RATIONALE", expanded=False):
             biz_text = parse_markdown(html.escape(global_summary["biz"]))
             tech_text = parse_markdown(html.escape(global_summary["tech"]))
-            
-            st.markdown(f"""
+
+            st.markdown(
+                f"""
             <div class='tech-card' style='border-top: 4px solid var(--naur-accent-risk);'>
                 <input type='checkbox' id='toggle-global' class='jargon-toggle'>
                 <div class='card-header'>
@@ -295,7 +452,9 @@ if raw_constraints:
                 <div class='tech-text'>{tech_text}</div>
                 <div class='biz-text'>{biz_text}</div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
     if active_domains:
         with st.expander("DOMAINS", expanded=True):
@@ -306,30 +465,41 @@ if raw_constraints:
                 "DS": {"name": "Data Science", "class": "card-ds"},
                 "UI": {"name": "UI/UX", "class": "card-ui"},
                 "DEVOPS": {"name": "DevOps", "class": "card-be"},
-                "DATA": {"name": "Data Eng", "class": "card-ds"}
+                "DATA": {"name": "Data Eng", "class": "card-ds"},
             }
-            
+
             items = list(constraints_dict.items())
             for i in range(0, len(items), 3):
                 cols = st.columns(3)
                 for j in range(3):
                     if i + j < len(items):
                         domain, data = items[i + j]
-                        conf = domain_config.get(domain, {"name": domain, "class": "card-be"})
-                        
+                        conf = domain_config.get(
+                            domain, {"name": domain, "class": "card-be"}
+                        )
+
                         biz_text = parse_markdown(html.escape(data["biz"]))
                         tech_text = parse_markdown(html.escape(data["tech"]))
-                        
-                        deep_dive_html = f"<details class='deep-dive'><summary>Deep Dive</summary><div class='deep-content'>{tech_text}</div></details>" if tech_text else ""
-                        
-                        st.markdown(f"""
+
+                        deep_dive_html = (
+                            f"<details class='deep-dive'><summary>Deep Dive</summary>"
+                            f"<div class='deep-content'>{tech_text}</div></details>"
+                            if tech_text
+                            else ""
+                        )
+
+                        st.markdown(
+                            f"""
                         <style>
                         #toggle-{domain}:checked ~ .tech-text {{ display: none; }}
                         #toggle-{domain}:checked ~ .biz-text {{ display: block; }}
                         </style>
-                        """, unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
 
-                        cols[j].markdown(f"""
+                        cols[j].markdown(
+                            f"""
                         <div class='tech-card {conf['class']}'>
                             <input type='checkbox' id='toggle-{domain}' class='jargon-toggle'>
                             <div class='card-header'>
@@ -340,18 +510,26 @@ if raw_constraints:
                             <div class='biz-text'>{biz_text}</div>
                             {deep_dive_html}
                         </div>
-                        """, unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
 
     if glossary:
         with st.expander("GLOSSARY", expanded=False):
             terms_html = ""
             for term, definition in glossary:
                 clean_def = parse_markdown(html.escape(definition))
-                terms_html += f"<div class='glossary-term'>{html.escape(term)}</div><div class='glossary-definition'>{clean_def}</div>"
-            st.markdown(f"<div class='glossary-section'>{terms_html}</div>", unsafe_allow_html=True)
+                terms_html += (
+                    f"<div class='glossary-term'>{html.escape(term)}</div>"
+                    f"<div class='glossary-definition'>{clean_def}</div>"
+                )
+            st.markdown(
+                f"<div class='glossary-section'>{terms_html}</div>",
+                unsafe_allow_html=True,
+            )
 
 # ---------------------------------------------------------
-# CHAT LEDGER
+# CHAT LEDGER & MESSAGE RENDERING
 # ---------------------------------------------------------
 st.markdown("<div class='section-heading'>LEDGER</div>", unsafe_allow_html=True)
 
@@ -362,21 +540,25 @@ for row in chat_messages:
     ts = row[2] if len(row) > 2 else ""
 
     if role_tag == "SYSTEM" and msg == "AUDIT_RUN":
-        st.markdown("<div class='audit-line'><span>Audit Executed</span></div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='audit-line'><span>Audit Executed</span></div>",
+            unsafe_allow_html=True,
+        )
         continue
 
-    clean_content = re.sub(r'\n?\[Context: .*?\]', '', msg)
-    clean_content = re.sub(r'\n?\[Governance: .*?\]', '', clean_content)
-    
+    clean_content = re.sub(r"\n?\[Context: .*?\]", "", msg)
+    clean_content = re.sub(r"\n?\[Governance: .*?\]", "", clean_content)
+
     try:
         parsed_ts = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").strftime("%I:%M %p")
-    except:
+    except (ValueError, TypeError):
         parsed_ts = str(ts)[11:16] if ts else ""
 
     initials, bg, fg = _ROLE_AVATAR_MAP.get(role_tag, ("U", "#2A2A2A", "#E9DDCF"))
     avatar_uri = make_avatar_uri(initials, bg, fg)
-    
-    st.markdown(f"""
+
+    st.markdown(
+        f"""
     <div class='chat-row'>
         <img class='chat-avatar' src='{avatar_uri}'>
         <div class='chat-content'>
@@ -387,19 +569,21 @@ for row in chat_messages:
             <div class='chat-text'>{parse_markdown(html.escape(clean_content.strip()))}</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
 
 if user_intent := st.chat_input("Join the discussion..."):
     active_role = st.session_state.get("active_role", "Product Manager")
     ctx_value = st.session_state.get("global_context", "").strip()
-    
+
     stamped_intent = user_intent
     if ctx_value:
         stamped_intent += f"\n[Context: {ctx_value} | Governance: {gov_phase}]"
     else:
         stamped_intent += f"\n[Governance: {gov_phase}]"
-        
+
     sm.append_message(session_id, active_role, stamped_intent)
     st.rerun()
