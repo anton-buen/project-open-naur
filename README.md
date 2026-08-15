@@ -1,91 +1,42 @@
 
 
 # Open Naur
-Different LLM integration: This version leverages a different large language model than the original.
 
-No human-in-the-loop: The design removes the human moderation layer, making the system more streamlined and accessible.
-
-Public accessibility: A public URL is provided to make the project easier to access and test.
-
-Work in progress: Development is ongoing, and features may evolve as the project matures.
-
-## 1. What's the big idea?
-
->**Project Title:** Naur (Inspired by **Peter Naur's** *Programming is Theory Building*)  
->**Challenge Theme:** Intelligent Systems for the Future of Work
-<br> <br> 
-### **The Problem: Alignment Tax.**
-
-I am a CS student, and I built Naur because I’ve watched development teams fail in real-time. We rarely fail because someone lacks the technical talent to write a loop or configure a server; we fail because humans are remarkably bad at understanding each other.
-
-In every project, you have specialists—frontend engineers, backend engineers, and product managers. They look at the software through completely different professional lenses. When a team sits down to plan, a simple choice often splinters into disjointed mental models. A word like "state" or "cache" means entirely different things depending on who you ask.
-
-This creates what I call the **Alignment Tax**. Teams waste hours trying to explain their domains to one another, struggling to hold cross-domain constraints in their heads. This comprehension debt hits like a train during integration week, leading to painful late-stage rewrites. Current industry workflows rely heavily on autonomous AI agents to generate code faster, but accelerating execution without addressing underlying human alignment simply helps a team build the wrong software at record speeds. Naur intercepts this friction upstream.
-<br> <br> 
-
-### **The Solution: ***An Agent-Driven Architectural Auditor*****
-Look, calling this an "Ontological Linter" might sound like a hackathon play to sound smart, but it isn't a static compiler analyzing the nature of cosmic existence. It is a highly specialized LLM orchestration strategy running over a local Model Context Protocol (MCP) server.
-
-Instead of forcing an AI to blindly guess your code intent, Naur exposes your team's communication ledger directly to your local IDE agent workspace. It consolidates the time teams waste teaching each other into explicit, data-driven design constraints by running three structural checks on command.
-
-First, it calculates the cross-domain blast radius of any technical proposal to see what breaks across other disciplines. Second, it enforces a "Missing Chair" rule—if Product and Frontend are making a decision in the chat but Backend is absent, Naur autonomously steps in to write strict constraints on behalf of that missing discipline. Finally, it catches terminology collisions, normalizing vague jargon into a centralized project dictionary to enforce ubiquitous language.
-<br> <br> <br> 
-
-
-## **Naur  — Dashboard and Features** 
-<img width="1917" height="1017" alt="Naur Dashboard Overview" src="https://github.com/user-attachments/assets/b95ee00f-f1d2-458e-b272-cec2d04ed74a" />
- <br> <br>
-Instead of dumping a wall of text into the chat, the AI synthesizes its background analysis into a real-time, interactive dashboard that serves as the team's single source of truth.
-
-
-<br><br> 
-
-**1. Alignment Risk & Blast Radius:**<br> 
-<img width="582" height="120" alt="Alignment Risk Score" src="https://github.com/user-attachments/assets/0365819f-bbe1-44f2-b4c6-1c1628e97987" />
-- Dynamic badges (PROD, FE, BE, DS, UI) light up at the top of the UI to map exact dependencies and calculate a global risk score (LOW, MEDIUM, HIGH).
-
-<br><br> 
-
-**2. The Global Rationale:**<br> 
-<img width="1492" height="390" alt="Global Rationale Card" src="https://github.com/user-attachments/assets/a1522b94-96e8-4962-9dde-e66ff310d9ab" />
-- Sitting immediately below the risk score, this master card provides the executive summary. It justifies the total risk score by synthesizing all the cross-domain friction into a single, unified view.
-
-<br><br> 
-
-**3. Domain Constraint Cards:**<br> 
-<img width="1537" height="777" alt="Domain Constraint Cards Breakdown" src="https://github.com/user-attachments/assets/db1faeca-68a9-4a45-866e-2bca4a02e418" />
-- The specific blast radius is then isolated into individual discipline cards (Product, Frontend, Backend, Data Science, UI/UX). Each card outlines the exact Engineering Requirements and Business Impacts justifying its respective badge.
-
-<br><br> 
-
-**4. Zero-Latency "Translate" & "Deep Dive" Toggles:**<br> 
-<img width="1001" height="692" alt="Pure CSS Translation Toggle View" src="https://github.com/user-attachments/assets/e34c825f-95c9-4866-bee0-e01756d26c16" />
-- Every single card—both the Global Rationale and the individual Domain Cards—is equipped with a pure-CSS "Translate" toggle to instantly flip technical jargon into layman's terms, and a "Deep Dive" expander to reveal the raw code-level strict blockers.
-
-<br><br> 
-
-**5. The Project Dictionary:**<br> 
-<img width="1542" height="611" alt="Persistent Glossary State" src="https://github.com/user-attachments/assets/2c50de9e-9796-4a9a-9811-1bac5c2a88e6" />
-- A persistent, centralized glossary pinned to the bottom of the dashboard that houses the normalized terms caught by the Ubiquitous Language check.
-
-<br> <br> 
-**The ultimate goal is to force shared understanding across domains, ensuring that whether a human or an AI agent ultimately writes the code, the underlying structural blueprint is “actually correct”. Any change or addition moving forward is also forced to be understood across said domains.**
-<br>
-<br>
-<br>
+> **Catch cross-domain architectural blast radius before shipping code.**
+> *Inspired by Peter Naur’s "Programming as Theory Building".*
 
 ---
 
-## 2. What did IBM Bob do?
+### The Problem: Alignment Tax
 
-I wanted to genuinely push the boundaries of what an IDE agent could do. Instead of relying on the easy path of pre-built LangFlow templates or hosted web wrappers, I undertook a tedious, highly customized local configuration to leverage IBM Bob as the backbone for my local MCP server. I wanted to see if Bob could coordinate and reason across an entire local codebase without breaking existing structures.
+Software projects rarely fail because engineers lack the technical ability to write code—they fail because disciplines operate in isolated mental models. A single unvalidated assumption (e.g., using a 1Hz polling interval or database-level 2PC locking) cascades into thread pool exhaustion, stale data pipelines, and broken UX.
 
-I used Bob as a core engineering partner to build this system. Halfway through the build, I realized a flat JSON file wouldn't survive concurrent agent operations. I deployed Bob to completely rewire the Streamlit frontend to connect seamlessly to a new transactional SQLite API, decoupling the active chat history from the presentation logic without introducing a single regression. I also used Bob to bypass Streamlit's native layout limitations, providing exact hex codes to rewrite the CSS theme engine.
+This is the **Alignment Tax**: hours wasted in debate, uncoordinated constraints, and late-stage integration rewrites. Accelerating execution with AI code generators without addressing underlying alignment simply builds the wrong software faster.
 
-Most importantly, I prompted Bob to act as a ruthless systems auditor against my own codebase. Bob successfully caught data-contract aliasing gaps and transaction isolation vulnerabilities in my initial drafts, allowing me to systematically refactor the pipeline to achieve full end-to-end type safety and offline air-gap independence.
+Open Naur intercepts architectural friction upstream before code is merged.
 
-Today, Naur uses IBM Bob as its active processing brain. Under a strict prompt routine, Bob processes incoming communication logs, isolates domain boundaries, and dispatches parallel tool mutations back to the SQLite database.
-<br> <br> 
+---
+
+### The Evolution: Project Naur vs. Open Naur
+
+What started as **Project Naur**—a local, human-in-the-loop hackathon proof-of-concept built for the **IBM Bob AI Builders Challenge**—has evolved into **Open Naur**: an autonomous, zero-friction web application and CI/CD gatekeeper accessible to any team.
+
+| Dimension | Project Naur (PoC) | Open Naur (Current) |
+| --- | --- | --- |
+| **Execution Plane** | Local IDE only (VS Code / IBM Bob) | Live Web Application + Cloud CI/CD Gatekeeper |
+| **Protocol & Trigger** | Manual human-in-the-loop MCP triggers | Autonomous LLM execution engine & Webhook listeners |
+| **Interface** | IDE terminal + local Streamlit UI | Responsive Web UI + automated GitHub PR comments |
+| **Output / Utility** | Local database view | Full Markdown Spec Exports (`.md`) + Live GitHub Audits |
+
+---
+
+### Core Capabilities
+
+* **Multi-Domain Risk Assessment:** Evaluates architectural discussions across 6 key disciplines (`PROD`, `FE`, `BE`, `DEVOPS`, `DATA`, `UI`).
+* **"Missing Chairs" Detection:** Automatically identifies absent team disciplines (e.g., Backend or Data Engineering) when high-stakes decisions are made.
+* **Instant Jargon Translation:** Features interactive "Translate" toggles to convert complex engineering blockers into business impacts for stakeholders.
+* **SRS Markdown Export:** Compiles global summaries, domain card constraints, and project glossaries into executive-ready `.md` architectural specs.
+* **Autonomous GitHub PR Gatekeeper:** Monitors incoming Pull Requests via Webhook and automatically posts zero-emoji architectural audit comments directly to PR discussions.
 
 ---
 
