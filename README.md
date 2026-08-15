@@ -137,28 +137,26 @@ uvicorn src.webhook_listener:app --reload --port 8000
 6. Save the webhook. Every opened or updated Pull Request will now automatically receive an Open Naur architectural audit comment.
 
 ---
+### Feedback & Community
 
-## 7. Team & License
-
-**Built for:** AI Builders Challenge with IBM Bob (Wildcard Challenge - Build Intelligent Systems for the Future of Work)
-
-**The Team:**
-* **Antonio III Buenafe** – Developer
-* **Links:** [GitHub Profile](https://github.com/anton-buen) | [LinkedIn Profile](www.linkedin.com/in/antonio-iii-buenafe-488a1936b)
-
-**Tech Stack:** IBM Bob, Model Context Protocol (MCP), Python 3.10+, SQLite, Streamlit 
-
-**License:** Distributed under the [MIT License](https://opensource.org/licenses/MIT).
-<br>
-> *"Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand."* — Peter Naur
-
-<br>
+Open Naur includes a built-in feedback survey (powered by Tally) directly within the web app interface. Whether you are a software engineer, product manager, designer, or fellow student builder, your feedback on input ergonomics, domain risk accuracy, and jargon translation helps directly shape future iterations.
 
 ---
 
-### 8. Project Evolution & History
+### Origin & History
 
-Great software is discovered through trial, error, and a stubborn belief that teams can always find a better way to work together. Naur is the proud result of those necessary failures and architectural pivots. If you want to explore the journey of how this tool evolved from a raw, ambitious concept into the deterministic MCP protocol it is today, you can read the original build history here:
+Open Naur is the product of continuous iteration:
 
-**[Explore how it started differently](https://github.com/anton-buen/cognitive-alignment-engine)**
+1. **Cognitive Alignment Engine (V1):** Initial research into capturing cross-domain friction in software planning.
+2. **Project Naur (V2):** Developed for the **IBM Bob AI Builders Challenge** (Wildcard Track: *Intelligent Systems for the Future of Work*). It operated as a localized IDE agent using an MCP server and human-in-the-loop triggers inside VS Code.
+3. **Open Naur (Current):** Rebuilt into an autonomous, browser-accessible web application and automated GitHub PR gatekeeper—removing IDE setup barriers so any team can run audits instantly.
 
+> *"Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand."*
+> — **Peter Naur**, *Programming as Theory Building*
+
+---
+
+### Author & License
+
+* **Author:** Antonio III Buenafe ([GitHub](https://github.com/anton-buen) | [LinkedIn](https://www.google.com/search?q=https://www.linkedin.com/in/antonio-iii-buenafe-488a1936b))
+* **License:** Distributed under the [MIT License](https://opensource.org/licenses/MIT).
