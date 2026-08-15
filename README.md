@@ -1,6 +1,12 @@
 
 
 # Open Naur
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Interactive%20UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-PR%20Gatekeeper-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-Schema%20Validation-E92063?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
+[![Domain](https://img.shields.io/badge/Domain-Architectural%20Governance%20%26%20Risk-orange?style=flat-square)]()
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 > **Catch cross-domain architectural blast radius before shipping code.**
 > *Inspired by Peter Naur’s "Programming as Theory Building".*
